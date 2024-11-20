@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using UnityEditor;
 using Debug = UnityEngine.Debug;
@@ -10,7 +9,7 @@ namespace Gilzoide.FSharp.Editor
     {
         public static async Task<bool> RunAsync(params string[] args)
         {
-            // Install dotnet SDK if necessary
+            // Install .NET SDK if necessary
             bool installedDotnet = await DotnetInstaller.InstallDotnetSdkAsync();
             if (!installedDotnet)
             {
