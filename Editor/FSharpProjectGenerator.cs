@@ -11,17 +11,23 @@ namespace Gilzoide.FSharp.Editor
     public static class FSharpProjectGenerator
     {
         private const string OutputDir = "Assets/FSharpOutput";
-        private static Assembly[] ScriptAssemblies => CompilationPipeline.GetAssemblies(BuildPipeline.isBuildingPlayer ? AssembliesType.PlayerWithoutTestAssemblies :  AssembliesType.Editor);
+        private const string AssemblyName = "Assembly-FSharp";
         private static string[] PrecompiledAssemblyPaths => CompilationPipeline.GetPrecompiledAssemblyPaths(CompilationPipeline.PrecompiledAssemblySources.All);
         private static bool _isBuildScheduled = false;
 
         [MenuItem("Tools/F#/Build Assembly-FSharp")]
         public static Task GenerateAndBuild()
         {
-            return GenerateAndBuild(true);
+            return GenerateAndBuild(false, true);
         }
 
-        public static async Task GenerateAndBuild(bool async)
+        [MenuItem("Tools/F#/Build Assembly-FSharp-Editor")]
+        public static Task GenerateAndBuildEditor()
+        {
+            return GenerateAndBuild(true, true);
+        }
+
+        public static async Task GenerateAndBuild(bool editor, bool async)
         {
             if (_isBuildScheduled)
             {
@@ -35,10 +41,9 @@ namespace Gilzoide.FSharp.Editor
             }
             try
             {
-                IEnumerable<string> sources = AssetDatabase.FindAssets("glob:\"*.fs\"")
-                    .Select(AssetDatabase.GUIDToAssetPath);
-                string fsprojPath = GenerateFsproj("Assembly-FSharp", sources);
-                await DotnetRunner.Run(async, "build", fsprojPath);
+                IEnumerable<string> sources = AssetDatabase.FindAssets("glob:\"*.fs\"").Select(AssetDatabase.GUIDToAssetPath);
+                string fsprojPath = GenerateFsproj(sources);
+                await DotnetRunner.Run(async, "build", fsprojPath, $"-p:Platform={(editor ? "Editor" : "Player")}");
                 AssetDatabase.Refresh();
             }
             finally
@@ -47,7 +52,7 @@ namespace Gilzoide.FSharp.Editor
             }
         }
 
-        public static string GenerateFsproj(string assemblyName, IEnumerable<string> sources)
+        public static string GenerateFsproj(IEnumerable<string> sources)
         {
             var fsproj = new XmlDocument();
             
@@ -58,31 +63,37 @@ namespace Gilzoide.FSharp.Editor
             defaultProperties.AddElement("AppendTargetFrameworkToOutputPath", "false");
             defaultProperties.AddElement("Configurations", "Debug;Release");
             defaultProperties.AddElement("Configuration", "Condition", " '$(Configuration)' == '' ", "Debug");
-            defaultProperties.AddElement("Platform", "Condition", " '$(Platform)' == '' ", "AnyCPU");
-            defaultProperties.AddElement("AssemblyName", assemblyName);
+            defaultProperties.AddElement("Platforms", "Editor;Player");
+            defaultProperties.AddElement("Platform", "Condition", " '$(Platform)' == '' ", "Editor");
+            defaultProperties.AddElement("AssemblyName", AssemblyName);
             defaultProperties.AddElement("OutputType", "Library");
             defaultProperties.AddElement("OutputPath", OutputDir);
             defaultProperties.AddElement("TargetFramework", "netstandard2.0");
             defaultProperties.AddElement("CopyLocalLockFileAssemblies", "true");
             defaultProperties.AddElement("SatelliteResourceLanguages", "none");
-
-            Assembly[] scriptAssemblies = ScriptAssemblies;
-            string[] scriptingDefines = scriptAssemblies[0].defines;
-            defaultProperties.AddElement("DefineConstants", string.Join(";", scriptingDefines));
-
-            defaultProperties = project.AddElement("PropertyGroup");
             defaultProperties.AddElement("NoStandardLibraries", "true");
             defaultProperties.AddElement("NoStdLib", "true");
             defaultProperties.AddElement("NoConfig", "true");
             defaultProperties.AddElement("DisableImplicitFrameworkReferences", "true");
             defaultProperties.AddElement("MSBuildWarningsAsMessages", "MSB3277");
 
-            var debugProperties = project.AddElement("PropertyGroup", "Condition", " '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ");
+            var editorProperties = project.AddElement("PropertyGroup", "Condition", " '$(Platform)' == 'Editor' ");
+            editorProperties.AddElement("OutputPath", OutputDir);
+            Assembly[] editorAssemblies = CompilationPipeline.GetAssemblies(AssembliesType.Editor);
+            string[] editorScriptingDefines = editorAssemblies[0].defines;
+            editorProperties.AddElement("DefineConstants", string.Join(";", editorScriptingDefines));
+
+            var playerProperties = project.AddElement("PropertyGroup", "Condition", " '$(Platform)' == 'Player' ");
+            Assembly[] playerAssemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies);
+            string[] playerScriptingDefines = playerAssemblies[0].defines;
+            playerProperties.AddElement("DefineConstants", string.Join(";", playerScriptingDefines));
+
+            var debugProperties = project.AddElement("PropertyGroup", "Condition", " '$(Configuration)' == 'Debug' ");
             debugProperties.AddElement("DebugSymbols", "true");
             debugProperties.AddElement("DebugType", "full");
             debugProperties.AddElement("Optimize", "false");
             
-            var releaseProperties = project.AddElement("PropertyGroup", "Condition", " '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ");
+            var releaseProperties = project.AddElement("PropertyGroup", "Condition", " '$(Configuration)' == 'Release' ");
             releaseProperties.AddElement("DebugSymbols", "false");
             releaseProperties.AddElement("Optimize", "true");
 
@@ -104,14 +115,23 @@ namespace Gilzoide.FSharp.Editor
                 reference.AddElement("Private", "false");
             }
 
-            foreach (Assembly assembly in scriptAssemblies)
+            var editorReferences = project.AddElement("ItemGroup", "Condition", " '$(Platform)' == 'Editor' ");
+            foreach (Assembly assembly in editorAssemblies)
             {
-                var reference = precompiledReferences.AddElement("Reference", "Include", assembly.name);
+                var reference = editorReferences.AddElement("Reference", "Include", assembly.name);
                 reference.AddElement("HintPath", assembly.outputPath);
                 reference.AddElement("Private", "false");
             }
 
-            string fsprojPath = Path.ChangeExtension(assemblyName, "fsproj");
+            var playerReferences = project.AddElement("ItemGroup", "Condition", " '$(Platform)' == 'Player' ");
+            foreach (Assembly assembly in playerAssemblies)
+            {
+                var reference = playerReferences.AddElement("Reference", "Include", assembly.name);
+                reference.AddElement("HintPath", assembly.outputPath);
+                reference.AddElement("Private", "false");
+            }
+
+            string fsprojPath = Path.ChangeExtension(AssemblyName, "fsproj");
             fsproj.Save(fsprojPath);
             return fsprojPath;
         }
