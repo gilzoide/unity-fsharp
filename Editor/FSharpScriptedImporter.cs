@@ -13,7 +13,7 @@ namespace Gilzoide.FSharp.Editor
             var scriptTextAsset = new TextAsset(File.ReadAllText(ctx.assetPath));
             ctx.AddObjectToAsset("main", scriptTextAsset);
 
-            FSharpProjectGenerator.GenerateAndBuildAsync().Forget();
+            FSharpProjectGenerator.GenerateAndBuild(true).Forget();
         }
     }
 }

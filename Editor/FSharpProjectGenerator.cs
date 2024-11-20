@@ -11,12 +11,17 @@ namespace Gilzoide.FSharp.Editor
     public static class FSharpProjectGenerator
     {
         private const string OutputDir = "Assets/FSharpOutput";
-        private static readonly Assembly[] ScriptAssemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies);
-        private static readonly string[] PrecompiledAssemblyPaths = CompilationPipeline.GetPrecompiledAssemblyPaths(CompilationPipeline.PrecompiledAssemblySources.All);
+        private static Assembly[] ScriptAssemblies => CompilationPipeline.GetAssemblies(BuildPipeline.isBuildingPlayer ? AssembliesType.PlayerWithoutTestAssemblies :  AssembliesType.Editor);
+        private static string[] PrecompiledAssemblyPaths => CompilationPipeline.GetPrecompiledAssemblyPaths(CompilationPipeline.PrecompiledAssemblySources.All);
         private static bool _isBuildScheduled = false;
 
         [MenuItem("Tools/F#/Build Assembly-FSharp")]
-        public static async Task GenerateAndBuildAsync()
+        public static Task GenerateAndBuild()
+        {
+            return GenerateAndBuild(true);
+        }
+
+        public static async Task GenerateAndBuild(bool async)
         {
             if (_isBuildScheduled)
             {
@@ -24,13 +29,16 @@ namespace Gilzoide.FSharp.Editor
             }
 
             _isBuildScheduled = true;
-            await Task.Yield();
+            if (async)
+            {
+                await Task.Yield();
+            }
             try
             {
                 IEnumerable<string> sources = AssetDatabase.FindAssets("glob:\"*.fs\"")
                     .Select(AssetDatabase.GUIDToAssetPath);
                 string fsprojPath = GenerateFsproj("Assembly-FSharp", sources);
-                await DotnetRunner.RunAsync("build", fsprojPath);
+                await DotnetRunner.Run(async, "build", fsprojPath);
                 AssetDatabase.Refresh();
             }
             finally
@@ -57,6 +65,10 @@ namespace Gilzoide.FSharp.Editor
             defaultProperties.AddElement("TargetFramework", "netstandard2.0");
             defaultProperties.AddElement("CopyLocalLockFileAssemblies", "true");
             defaultProperties.AddElement("SatelliteResourceLanguages", "none");
+
+            Assembly[] scriptAssemblies = ScriptAssemblies;
+            string[] scriptingDefines = scriptAssemblies[0].defines;
+            defaultProperties.AddElement("DefineConstants", string.Join(";", scriptingDefines));
 
             defaultProperties = project.AddElement("PropertyGroup");
             defaultProperties.AddElement("NoStandardLibraries", "true");
@@ -92,7 +104,7 @@ namespace Gilzoide.FSharp.Editor
                 reference.AddElement("Private", "false");
             }
 
-            foreach (Assembly assembly in ScriptAssemblies)
+            foreach (Assembly assembly in scriptAssemblies)
             {
                 var reference = precompiledReferences.AddElement("Reference", "Include", assembly.name);
                 reference.AddElement("HintPath", assembly.outputPath);
