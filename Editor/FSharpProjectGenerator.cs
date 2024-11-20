@@ -55,6 +55,8 @@ namespace Gilzoide.FSharp.Editor
             defaultProperties.AddElement("OutputType", "Library");
             defaultProperties.AddElement("OutputPath", OutputDir);
             defaultProperties.AddElement("TargetFramework", "netstandard2.0");
+            defaultProperties.AddElement("CopyLocalLockFileAssemblies", "true");
+            defaultProperties.AddElement("SatelliteResourceLanguages", "none");
 
             defaultProperties = project.AddElement("PropertyGroup");
             defaultProperties.AddElement("NoStandardLibraries", "true");
