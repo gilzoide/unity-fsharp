@@ -37,18 +37,17 @@ namespace Gilzoide.FSharp.Editor
             .Select(AssetDatabase.GUIDToAssetPath)
             .First();
 
-        [MenuItem("Tools/Dotnet/Install latest SDK")]
-        public static Task<bool> InstallDotnetSdk()
+        [MenuItem("Tools/F#/Install dotnet SDK")]
+        public static Task<bool> InstallDotnetSdkAsync()
         {
-            return InstallDotnetSdk(DotnetSdkVersion);
+            return InstallDotnetSdkAsync(DotnetSdkVersion);
         }
 
-        public static async Task<bool> InstallDotnetSdk(string sdkVersion)
+        public static async Task<bool> InstallDotnetSdkAsync(string sdkVersion)
         {
             if (Directory.Exists($"{DotnetInstallDir}/sdk")
                 && (string.IsNullOrEmpty(sdkVersion) || Directory.Exists($"{DotnetInstallDir}/sdk/{sdkVersion}")))
             {
-                Debug.Log($"Already installed in '{DotnetInstallDir}/sdk'");
                 return true;
             }
 

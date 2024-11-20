@@ -1,10 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
+using UnityEditor;
 using UnityEditor.Compilation;
-using UnityEngine;
 
 namespace Gilzoide.FSharp.Editor
 {
@@ -13,13 +13,33 @@ namespace Gilzoide.FSharp.Editor
         private const string OutputDir = "Assets/FSharpOutput";
         private static readonly Assembly[] ScriptAssemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies);
         private static readonly string[] PrecompiledAssemblyPaths = CompilationPipeline.GetPrecompiledAssemblyPaths(CompilationPipeline.PrecompiledAssemblySources.All);
+        private static bool _isBuildScheduled = false;
 
-        public static void GenerateFsproj(string source)
+        [MenuItem("Tools/F#/Build Assembly-FSharp")]
+        public static async Task GenerateAndBuildAsync()
         {
-            GenerateFsproj(Path.GetFileNameWithoutExtension(source), source);
+            if (_isBuildScheduled)
+            {
+                return;
+            }
+
+            _isBuildScheduled = true;
+            await Task.Yield();
+            try
+            {
+                IEnumerable<string> sources = AssetDatabase.FindAssets("glob:\"*.fs\"")
+                    .Select(AssetDatabase.GUIDToAssetPath);
+                string fsprojPath = GenerateFsproj("Assembly-FSharp", sources);
+                await DotnetRunner.RunAsync("build", fsprojPath);
+                AssetDatabase.Refresh();
+            }
+            finally
+            {
+                _isBuildScheduled = false;
+            }
         }
 
-        public static void GenerateFsproj(string assemblyName, string source)
+        public static string GenerateFsproj(string assemblyName, IEnumerable<string> sources)
         {
             var fsproj = new XmlDocument();
             
@@ -53,7 +73,10 @@ namespace Gilzoide.FSharp.Editor
             releaseProperties.AddElement("Optimize", "true");
 
             var compileItems = project.AddElement("ItemGroup");
-            compileItems.AddElement("Compile", "Include", source);
+            foreach (string source in sources)
+            {
+                compileItems.AddElement("Compile", "Include", source);
+            }
 
             var precompiledReferences = project.AddElement("ItemGroup");
             foreach (string path in PrecompiledAssemblyPaths)
@@ -74,7 +97,9 @@ namespace Gilzoide.FSharp.Editor
                 reference.AddElement("Private", "false");
             }
 
-            fsproj.Save(Path.ChangeExtension(assemblyName, "fsproj"));
+            string fsprojPath = Path.ChangeExtension(assemblyName, "fsproj");
+            fsproj.Save(fsprojPath);
+            return fsprojPath;
         }
 
         private static XmlElement AddElement(this XmlNode xml, string tag)
