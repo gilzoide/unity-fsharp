@@ -2,7 +2,7 @@
   "name": "com.gilzoide.fsharp",
   "displayName": "F#",
   "version": "1.0.0-preview1",
-  "description": "Add support for F# scripting in Unity",
+  "description": "Support F# scripting in Unity with automatic compilation",
   "homepage": "https://github.com/gilzoide/unity-fsharp",
   "license": "Unlicense",
   "author": {
