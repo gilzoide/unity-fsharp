@@ -24,12 +24,16 @@ namespace Gilzoide.FSharp.Editor
         {
             FSharpProjectGenerator.GenerateFsprojIfNotFound();
             DotnetRunner.Run(false, "build", FSharpProjectGenerator.FSProjPath, $"-p:Platform={platform}", $"-p:Configuration={configuration}").Wait();
+            AssetDatabase.ImportAsset(FSharpProjectGenerator.OutputDllPath);
         }
         
-        public static Task BuildAsync(FSharpPlatform platform, FSharpConfiguration configuration)
+        public static async Task BuildAsync(FSharpPlatform platform, FSharpConfiguration configuration)
         {
             FSharpProjectGenerator.GenerateFsprojIfNotFound();
-            return DotnetRunner.Run(true, "build", FSharpProjectGenerator.FSProjPath, $"-p:Platform={platform}", $"-p:Configuration={configuration}");
+            if (await DotnetRunner.Run(true, "build", FSharpProjectGenerator.FSProjPath, $"-p:Platform={platform}", $"-p:Configuration={configuration}"))
+            {
+                AssetDatabase.ImportAsset(FSharpProjectGenerator.OutputDllPath);
+            }
         }
 
         public static async Task BuildOnceAsync(FSharpPlatform platform, FSharpConfiguration configuration)

@@ -10,9 +10,10 @@ namespace Gilzoide.FSharp.Editor
 {
     public static class FSharpProjectGenerator
     {
-        public const string OutputDir = "Assets/FSharpOutput";
         public const string AssemblyName = "Assembly-FSharp";
         public const string FSProjPath = AssemblyName + ".fsproj";
+        public const string OutputDir = "Assets/FSharpOutput";
+        public const string OutputDllPath = OutputDir + "/" + AssemblyName + ".dll";
 
         private static bool _isGenerateScheduled = false;
 
