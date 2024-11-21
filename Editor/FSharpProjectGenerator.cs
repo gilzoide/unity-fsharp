@@ -47,7 +47,10 @@ namespace Gilzoide.FSharp.Editor
         [MenuItem("Tools/F#/Generate Assembly-FSharp.fsproj")]
         public static string GenerateFsproj()
         {
-            IEnumerable<string> sources = AssetDatabase.FindAssets("glob:\"*.fs\"").Select(AssetDatabase.GUIDToAssetPath);
+            // TODO: add automatic file dependency detection
+            IEnumerable<string> packageSources = AssetDatabase.FindAssets("glob:\"*.fs\"", new[] { "Packages" });
+            IEnumerable<string> assetsSources = AssetDatabase.FindAssets("glob:\"*.fs\"", new[] { "Assets" });
+            IEnumerable<string> sources = packageSources.Concat(assetsSources).Select(AssetDatabase.GUIDToAssetPath);
             return GenerateFsproj(sources);
         }
 
