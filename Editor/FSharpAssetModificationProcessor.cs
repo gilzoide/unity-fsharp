@@ -1,3 +1,4 @@
+using System.Globalization;
 using Gilzoide.FSharp.Editor.Internal;
 using UnityEditor;
 
@@ -7,7 +8,7 @@ namespace Gilzoide.FSharp.Editor
     {
         private static void OnWillCreateAsset(string assetName)
         {
-            if (assetName.EndsWith(".fs"))
+            if (ShouldGenerateFsproj(assetName))
             {
                 FSharpProjectGenerator.GenerateFsprojOnceAsync().Forget();
             }
@@ -15,7 +16,7 @@ namespace Gilzoide.FSharp.Editor
         
         private static AssetDeleteResult OnWillDeleteAsset(string assetName, RemoveAssetOptions options)
         {
-            if (assetName.EndsWith(".fs"))
+            if (ShouldGenerateFsproj(assetName))
             {
                 FSharpProjectGenerator.GenerateFsprojOnceAsync().Forget();
             }
@@ -24,11 +25,18 @@ namespace Gilzoide.FSharp.Editor
 
         private static AssetMoveResult OnWillMoveAsset(string sourcePath, string destinationPath)
         {
-            if (sourcePath.EndsWith(".fs") || destinationPath.EndsWith(".fs"))
+            if (ShouldGenerateFsproj(sourcePath) || ShouldGenerateFsproj(destinationPath))
             {
                 FSharpProjectGenerator.GenerateFsprojOnceAsync().Forget();
             }
             return AssetMoveResult.DidNotMove;
+        }
+
+        private static bool ShouldGenerateFsproj(string assetName)
+        {
+            return assetName.EndsWith(".fs", true, CultureInfo.InvariantCulture)
+                || assetName.EndsWith(".dll", true, CultureInfo.InvariantCulture)
+                || assetName.EndsWith(".asmdef", true, CultureInfo.InvariantCulture);
         }
     }
 }
