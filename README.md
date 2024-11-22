@@ -46,5 +46,7 @@ type MyFSharpComponent() =
     // In F#, we mutate fields with `<-` instead of `=`
     serializedFloat <- 10f
     
-    let child = Object.Instantiate(prefab, this.transform)
+    // In F#, use `isNull` and `isNotNull` to check for null Objects
+    if isNotNull prefab then
+      Object.Instantiate(prefab, this.transform) |> ignore
 ```
