@@ -8,12 +8,12 @@ namespace Gilzoide.FSharp.Editor.Internal
 {
     public static class ProcessRunner
     {
-        public static Task<bool> Run(string fileName, bool async, params string[] args)
+        public static Task<bool> Run(string progressMessage, bool async, string fileName, params string[] args)
         {
-            return Run(fileName, async, (IEnumerable<string>) args);
+            return Run(progressMessage, async, fileName, (IEnumerable<string>) args);
         }
 
-        public static async Task<bool> Run(string fileName, bool async, IEnumerable<string> args)
+        public static async Task<bool> Run(string progressMessage, bool async, string fileName, IEnumerable<string> args)
         {
             var processInfo = new ProcessStartInfo
             {
@@ -29,18 +29,18 @@ namespace Gilzoide.FSharp.Editor.Internal
                 {
                     if (!string.IsNullOrEmpty(args.Data))
                     {
-                        Debug.Log(args.Data);
+                        Debug.Log($"[{progressMessage}] {args.Data}");
                     }
                 };
                 process.ErrorDataReceived += (sender, args) =>
                 {
                     if (!string.IsNullOrEmpty(args.Data))
                     {
-                        Debug.LogError(args.Data);
+                        Debug.LogError($"[{progressMessage}] {args.Data}");
                     }
                 };
 
-                var progressId = Progress.Start("Installing dotnet SDK");
+                var progressId = Progress.Start(progressMessage);
                 Progress.Report(progressId, 0);
                 try
                 {

@@ -20,7 +20,7 @@ namespace Gilzoide.FSharp.Editor
                 return false;
             }
 
-            return await ProcessRunner.Run($"{DotnetInstaller.DotnetInstallDir}/dotnet", async, args);
+            return await ProcessRunner.Run("dotnet build Assembly-FSharp.fsproj", async, $"{DotnetInstaller.DotnetInstallDir}/dotnet", args);
         }
     }
 }

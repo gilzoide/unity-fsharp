@@ -66,7 +66,7 @@ namespace Gilzoide.FSharp.Editor
                 arguments.Add($"'{sdkVersion}'");
             }
 
-            return await ProcessRunner.Run(DotnetInstallScriptPath, async, arguments);
+            return await ProcessRunner.Run("Installing .NET SDK", async, DotnetInstallScriptPath, arguments);
         }
     }
 }
