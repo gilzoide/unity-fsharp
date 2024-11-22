@@ -1,7 +1,4 @@
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Xml;
 using UnityEditor;
 using UnityEditor.Compilation;
@@ -15,27 +12,6 @@ namespace Gilzoide.FSharp.Editor
         public const string OutputDir = "Assets/FSharpOutput";
         public const string OutputDllPath = OutputDir + "/" + AssemblyName + ".dll";
 
-        private static bool _isGenerateScheduled = false;
-
-        public static async Task GenerateFsprojOnceAsync()
-        {
-            if (_isGenerateScheduled)
-            {
-                return;
-            }
-
-            _isGenerateScheduled = true;
-            try
-            {
-                await Task.Yield();
-                GenerateFsproj();
-            }
-            finally
-            {
-                _isGenerateScheduled = false;
-            }
-        }
-
         public static void GenerateFsprojIfNotFound()
         {
             if (!File.Exists(FSProjPath))
@@ -46,15 +22,6 @@ namespace Gilzoide.FSharp.Editor
 
         [MenuItem("Tools/F#/Generate Assembly-FSharp.fsproj")]
         public static string GenerateFsproj()
-        {
-            // TODO: add automatic file dependency detection
-            IEnumerable<string> packageSources = AssetDatabase.FindAssets("glob:\"*.fs\"", new[] { "Packages" });
-            IEnumerable<string> assetsSources = AssetDatabase.FindAssets("glob:\"*.fs\"", new[] { "Assets" });
-            IEnumerable<string> sources = packageSources.Concat(assetsSources).Select(AssetDatabase.GUIDToAssetPath);
-            return GenerateFsproj(sources);
-        }
-
-        public static string GenerateFsproj(IEnumerable<string> sources)
         {
             var fsproj = new XmlDocument();
             
@@ -99,7 +66,7 @@ namespace Gilzoide.FSharp.Editor
             releaseProperties.AddElement("Optimize", "true");
 
             var compileItems = project.AddElement("ItemGroup");
-            foreach (string source in sources)
+            foreach (string source in FSharpScriptOrder.LoadScriptPaths())
             {
                 compileItems.AddElement("Compile", "Include", source);
             }
