@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -26,9 +27,10 @@ namespace Gilzoide.FSharp.Editor.Internal
         {
             public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
             {
+                string assetPath = property.FindPropertyRelative(nameof(AssetPath)).stringValue;
                 using (new EditorGUI.DisabledScope(true))
                 {
-                    EditorGUI.PropertyField(position, property.FindPropertyRelative(nameof(AssetPath)), GUIContent.none);
+                    EditorGUI.TextField(position, Path.GetFileName(assetPath), assetPath);
                 }
             }
 
