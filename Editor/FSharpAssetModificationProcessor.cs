@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Threading.Tasks;
+using Gilzoide.FSharp.Editor.Internal;
 using UnityEditor;
 
 namespace Gilzoide.FSharp.Editor
@@ -51,7 +52,7 @@ namespace Gilzoide.FSharp.Editor
             try
             {
                 await Task.Yield();
-                FSharpScriptOrder.SyncMissingScripts();
+                FSharpSettings.Instance.RefreshScriptCompileOrder();
                 FSharpProjectGenerator.GenerateFsproj();
             }
             finally

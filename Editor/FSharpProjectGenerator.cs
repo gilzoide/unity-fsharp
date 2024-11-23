@@ -1,5 +1,7 @@
 using System.IO;
+using System.Linq;
 using System.Xml;
+using Gilzoide.FSharp.Editor.Internal;
 using UnityEditor;
 using UnityEditor.Compilation;
 
@@ -66,7 +68,7 @@ namespace Gilzoide.FSharp.Editor
             releaseProperties.AddElement("Optimize", "true");
 
             var compileItems = project.AddElement("ItemGroup");
-            foreach (string source in FSharpScriptOrder.LoadScriptPaths())
+            foreach (string source in FSharpSettings.Instance.ScriptCompileOrder.Select(assetGuid => assetGuid.AssetPath))
             {
                 compileItems.AddElement("Compile", "Include", source);
             }
