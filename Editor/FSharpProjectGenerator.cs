@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -68,9 +69,15 @@ namespace Gilzoide.FSharp.Editor
             releaseProperties.AddElement("Optimize", "true");
 
             var compileItems = project.AddElement("ItemGroup");
-            foreach (string source in FSharpSettings.Instance.ScriptCompileOrder.Select(assetGuid => assetGuid.AssetPath))
+            foreach (string source in FSharpSettings.Instance.PlayerScriptPaths)
             {
                 compileItems.AddElement("Compile", "Include", source);
+            }
+            
+            var editorCompileItems = project.AddElement("ItemGroup", "Condition", " '$(Platform)' == 'Editor' ");
+            foreach (string source in FSharpSettings.Instance.EditorScriptPaths)
+            {
+                editorCompileItems.AddElement("Compile", "Include", source);
             }
 
             var precompiledReferences = project.AddElement("ItemGroup");

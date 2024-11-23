@@ -11,7 +11,9 @@ namespace Gilzoide.FSharp.Editor.Internal
         [SerializeField] private List<AssetGuid> _scriptCompileOrder = new();
 
         public override string DefaultAssetPath => $"Assets/Editor/{nameof(FSharpSettings)}.asset";
-        public List<AssetGuid> ScriptCompileOrder => _scriptCompileOrder;
+        public IEnumerable<string> ScriptPaths => _scriptCompileOrder.Select(assetGuid => assetGuid.AssetPath);
+        public IEnumerable<string> PlayerScriptPaths => ScriptPaths.Where(s => !s.Contains("/Editor/"));
+        public IEnumerable<string> EditorScriptPaths => ScriptPaths.Where(s => s.Contains("/Editor/"));
 
         protected override async void OnValidate()
         {
