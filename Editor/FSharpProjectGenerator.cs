@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml;
 using Gilzoide.FSharp.Editor.Internal;
 using UnityEditor;
@@ -27,7 +25,7 @@ namespace Gilzoide.FSharp.Editor
         public static string GenerateFsproj()
         {
             var fsproj = new XmlDocument();
-            
+
             var project = fsproj.AddElement("Project", "Sdk", "Microsoft.NET.Sdk");
             var defaultProperties = project.AddElement("PropertyGroup");
             defaultProperties.AddElement("GenerateAssemblyInfo", "false");
@@ -63,7 +61,7 @@ namespace Gilzoide.FSharp.Editor
             debugProperties.AddElement("DebugSymbols", "true");
             debugProperties.AddElement("DebugType", "full");
             debugProperties.AddElement("Optimize", "false");
-            
+
             var releaseProperties = project.AddElement("PropertyGroup", "Condition", " '$(Configuration)' == 'Release' ");
             releaseProperties.AddElement("DebugSymbols", "false");
             releaseProperties.AddElement("Optimize", "true");
@@ -73,7 +71,7 @@ namespace Gilzoide.FSharp.Editor
             {
                 compileItems.AddElement("Compile", "Include", source);
             }
-            
+
             var editorCompileItems = project.AddElement("ItemGroup", "Condition", " '$(Platform)' == 'Editor' ");
             foreach (string source in FSharpSettings.Instance.EditorScriptPaths)
             {
@@ -126,14 +124,14 @@ namespace Gilzoide.FSharp.Editor
             child.InnerText = text;
             return child;
         }
-        
+
         private static XmlElement AddElement(this XmlNode xml, string tag, string attribute, string value)
         {
             var child = xml.AddElement(tag);
             child.SetAttribute(attribute, value);
             return child;
         }
-        
+
         private static XmlElement AddElement(this XmlNode xml, string tag, string attribute, string value, string text)
         {
             var child = xml.AddElement(tag, attribute, value);

@@ -41,7 +41,7 @@ namespace Gilzoide.FSharp.Editor
         {
             return InstallDotnetSdk(DotnetSdkVersion, true);
         }
-        
+
         public static Task<bool> InstallDotnetSdk(bool async)
         {
             return InstallDotnetSdk(DotnetSdkVersion, async);

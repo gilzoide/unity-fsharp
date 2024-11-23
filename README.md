@@ -19,9 +19,9 @@ Experimental support for F# scripting in Unity: create F# scripts with the `.fs`
 ## Defining file compile order
 1. Select the `Assets/Editor/FSharpSettings` asset
 2. Freely reorder script file paths in the `Script Compile Order` list.
-  Tip: keep `FSharpGlobals.fs` first.
-  <br/>
-  <img src="Extras~/script-ordering.png" width="400" />
+   Tip: keep `FSharpGlobals.fs` first.
+
+   <img src="Extras~/script-ordering.png" width="400" />
 
 
 ## Creating scripts in F#
@@ -39,7 +39,7 @@ type MyFSharpComponent() =
   // Use mutable serialized fields to edit them in the Inspector
   [<SerializeField>]
   let mutable serializedFloat = 5f
-  
+
   [<SerializeField>]
   let mutable prefab: GameObject = null
 
@@ -55,7 +55,7 @@ type MyFSharpComponent() =
   member this.Start() =
     // In F#, we mutate fields with `<-` instead of `=`
     serializedFloat <- 10f
-    
+
     // In F#, use `isNull` and `isNotNull` to check for null Objects
     if isNotNull prefab then
       Object.Instantiate(prefab, this.transform) |> ignore

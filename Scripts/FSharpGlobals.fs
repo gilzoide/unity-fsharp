@@ -7,5 +7,5 @@ module Globals =
     | null -> false
     | :? Object as unityObject -> Object.op_Implicit unityObject
     | _ -> true
-  
+
   let isNull (o: objnull) = isNotNull o |> not

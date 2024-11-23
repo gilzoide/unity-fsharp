@@ -20,7 +20,7 @@ namespace Gilzoide.FSharp.Editor.Internal
         {
             AssetPath = AssetDatabase.GUIDToAssetPath(Guid);
         }
-        
+
         [CustomPropertyDrawer(typeof(AssetGuid))]
         private class AssetGuidPropertyDrawer : PropertyDrawer
         {
