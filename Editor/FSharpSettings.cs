@@ -9,11 +9,13 @@ namespace Gilzoide.FSharp.Editor.Internal
     public class FSharpSettings : SingletonScriptableObject<FSharpSettings>
     {
         [SerializeField] private List<AssetGuid> _scriptCompileOrder = new();
+        [SerializeField] private List<PackageReference> _packageReferences = new();
 
         public override string DefaultAssetPath => $"Assets/Editor/{nameof(FSharpSettings)}.asset";
         public IEnumerable<string> ScriptPaths => _scriptCompileOrder.Select(assetGuid => assetGuid.AssetPath);
         public IEnumerable<string> PlayerScriptPaths => ScriptPaths.Where(s => !s.Contains("/Editor/"));
         public IEnumerable<string> EditorScriptPaths => ScriptPaths.Where(s => s.Contains("/Editor/"));
+        public List<PackageReference> PackageReferences => _packageReferences;
 
         protected override async void OnValidate()
         {

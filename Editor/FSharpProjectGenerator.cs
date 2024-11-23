@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Gilzoide.FSharp.Editor.Internal;
@@ -66,6 +67,15 @@ namespace Gilzoide.FSharp.Editor
             releaseProperties.AddElement("DebugSymbols", "false");
             releaseProperties.AddElement("Optimize", "true");
 
+            if (!FSharpSettings.Instance.PackageReferences.IsNullOrEmpty())
+            {
+                var packageReferences = project.AddElement("ItemGroup");
+                foreach (PackageReference packageReference in FSharpSettings.Instance.PackageReferences)
+                {
+                    packageReference.AddElementTo(packageReferences);
+                }
+            }
+
             var compileItems = project.AddElement("ItemGroup");
             foreach (string source in FSharpSettings.Instance.PlayerScriptPaths)
             {
@@ -109,34 +119,6 @@ namespace Gilzoide.FSharp.Editor
 
             fsproj.Save(FSProjPath);
             return FSProjPath;
-        }
-
-        private static XmlElement AddElement(this XmlNode xml, string tag)
-        {
-            var child = (xml is XmlDocument xmlDoc ? xmlDoc : xml.OwnerDocument).CreateElement(tag);
-            xml.AppendChild(child);
-            return child;
-        }
-
-        private static XmlElement AddElement(this XmlNode xml, string tag, string text)
-        {
-            var child = xml.AddElement(tag);
-            child.InnerText = text;
-            return child;
-        }
-
-        private static XmlElement AddElement(this XmlNode xml, string tag, string attribute, string value)
-        {
-            var child = xml.AddElement(tag);
-            child.SetAttribute(attribute, value);
-            return child;
-        }
-
-        private static XmlElement AddElement(this XmlNode xml, string tag, string attribute, string value, string text)
-        {
-            var child = xml.AddElement(tag, attribute, value);
-            child.InnerText = text;
-            return child;
         }
     }
 }

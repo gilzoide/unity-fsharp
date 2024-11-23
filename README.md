@@ -10,6 +10,7 @@ Experimental support for F# scripting in Unity: create F# scripts with the `.fs`
   + The DLL references the same DLLs as `Assembly-CSharp` does.
   + Scripts inside `Editor` folders are only available in the Unity editor
 - Supports defining file compile order in the `Assets/Editor/FSharpSettings` asset
+- Supports defining package references in the `Assets/Editor/FSharpSettings` asset
 - Uses the same [scripting symbols](https://docs.unity3d.com/Manual/scripting-symbol-reference.html) as C#, e.g. `UNITY_EDITOR`, `UNITY_STANDALONE`, `DEVELOPMENT_BUILD`, etc...
 - `MonoBehaviour`/`ScriptableObject` class names do not need to have the same name as their source files.
   You can also declare several of them in a single file.
