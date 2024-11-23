@@ -31,6 +31,7 @@ namespace Gilzoide.FSharp.Editor.Internal
         protected static T _instance;
 
         public virtual string DefaultAssetPath => $"Assets/{nameof(T)}.asset";
+        public static bool InstanceAssetExists => !AssetDatabase.FindAssets($"t:{nameof(T)}").IsNullOrEmpty();
 
         protected virtual void OnValidate()
         {

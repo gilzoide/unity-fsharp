@@ -14,11 +14,11 @@ namespace Gilzoide.FSharp.Editor
         {
             if (_projectRegex.Match(content) is Match match)
             {
-                byte[] md5 = MD5.Create().ComputeHash(Encoding.ASCII.GetBytes("Assembly-FSharp.fsproj"));
+                byte[] md5 = MD5.Create().ComputeHash(Encoding.ASCII.GetBytes(FSharpProjectGenerator.AssemblyName));
                 string guid = new Guid(md5).ToString("B").ToUpper();
                 var contentBuilder = new StringBuilder();
                 contentBuilder.Append(content, 0, match.Index);
-                contentBuilder.AppendLine($"{match.Captures[0]} = \"Assembly-FSharp\", \"Assembly-FSharp.fsproj\", \"{guid}\"");
+                contentBuilder.AppendLine($"{match.Captures[0]} = \"{FSharpProjectGenerator.AssemblyName}\", \"{FSharpProjectGenerator.FSProjPath}\", \"{guid}\"");
                 contentBuilder.AppendLine("EndProject");
                 contentBuilder.Append(content, match.Index, content.Length - match.Index);
                 content = contentBuilder.ToString();

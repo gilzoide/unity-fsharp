@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor;
+using UnityEditor.Callbacks;
 using UnityEngine;
 
 namespace Gilzoide.FSharp.Editor.Internal
@@ -12,6 +13,7 @@ namespace Gilzoide.FSharp.Editor.Internal
         [SerializeField] private List<PackageReference> _packageReferences = new();
 
         public override string DefaultAssetPath => $"Assets/Editor/{nameof(FSharpSettings)}.asset";
+        public IEnumerable<string> ScriptGuids => _scriptCompileOrder.Select(assetGuid => assetGuid.Guid);
         public IEnumerable<string> ScriptPaths => _scriptCompileOrder.Select(assetGuid => assetGuid.AssetPath);
         public IEnumerable<string> PlayerScriptPaths => ScriptPaths.Where(s => !s.Contains("/Editor/"));
         public IEnumerable<string> EditorScriptPaths => ScriptPaths.Where(s => s.Contains("/Editor/"));
@@ -20,13 +22,17 @@ namespace Gilzoide.FSharp.Editor.Internal
         protected override async void OnValidate()
         {
             base.OnValidate();
-            if (_scriptCompileOrder.Count == 0)
+            await Task.Yield();
+            if (this)
             {
                 RefreshScriptCompileOrder();
             }
-            // yield to run on main thread
-            await Task.Yield();
-            FSharpProjectGenerator.GenerateFsproj();
+        }
+
+        [DidReloadScripts]
+        private static void CreateFSharpSettingsIfNecessary()
+        {
+            _ = Instance;
         }
 
         [ContextMenu("Refresh Script Compile Order")]
@@ -46,6 +52,40 @@ namespace Gilzoide.FSharp.Editor.Internal
         public static void SelectFSharpSettingsAsset()
         {
             EditorGUIUtility.PingObject(Instance);
+        }
+
+        [CustomEditor(typeof(FSharpSettings))]
+        private class FSharpSettingsEditor : UnityEditor.Editor
+        {
+            private bool _rebuildOnDisable = false;
+
+            protected void OnEnable()
+            {
+                _rebuildOnDisable = false;
+            }
+
+            protected void OnDisable()
+            {
+                if (_rebuildOnDisable)
+                {
+                    FSharpBuilder.BuildAsync(FSharpPlatform.Editor, FSharpConfiguration.Debug).Forget();
+                }
+            }
+
+            public override void OnInspectorGUI()
+            {
+                if (DrawDefaultInspector())
+                {
+                    _rebuildOnDisable = true;
+                }
+
+                EditorGUILayout.Space();
+                if (GUILayout.Button("Build"))
+                {
+                    FSharpBuilder.BuildAsync(FSharpPlatform.Editor, FSharpConfiguration.Debug).Forget();
+                    _rebuildOnDisable = false;
+                }
+            }
         }
     }
 }

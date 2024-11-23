@@ -27,7 +27,8 @@ namespace Gilzoide.FSharp.Editor.Internal
         {
             public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
             {
-                string assetPath = property.FindPropertyRelative(nameof(AssetPath)).stringValue;
+                string guid = property.FindPropertyRelative(nameof(Guid)).stringValue;
+                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
                 using (new EditorGUI.DisabledScope(true))
                 {
                     EditorGUI.TextField(position, Path.GetFileName(assetPath), assetPath);

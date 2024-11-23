@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Gilzoide.FSharp.Editor
 {
     [ScriptedImporter(0, "fs")]
-    public class FSharpScriptedImporter : ScriptedImporter
+    public class FSharpScriptImporter : ScriptedImporter
     {
         public override void OnImportAsset(AssetImportContext ctx)
         {

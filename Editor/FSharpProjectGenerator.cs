@@ -14,14 +14,6 @@ namespace Gilzoide.FSharp.Editor
         public const string OutputDir = "Assets/FSharpOutput";
         public const string OutputDllPath = OutputDir + "/" + AssemblyName + ".dll";
 
-        public static void GenerateFsprojIfNotFound()
-        {
-            if (!File.Exists(FSProjPath))
-            {
-                GenerateFsproj();
-            }
-        }
-
         [MenuItem("Tools/F#/Generate Assembly-FSharp.fsproj")]
         public static string GenerateFsproj()
         {

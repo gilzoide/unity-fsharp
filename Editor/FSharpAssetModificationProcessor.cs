@@ -14,7 +14,7 @@ namespace Gilzoide.FSharp.Editor
                 OnSomethingChanged();
             }
         }
-        
+
         private static AssetDeleteResult OnWillDeleteAsset(string assetName, RemoveAssetOptions options)
         {
             if (ShouldGenerateFsproj(assetName))

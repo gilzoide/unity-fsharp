@@ -35,7 +35,7 @@ namespace Gilzoide.FSharp.Editor
 
         private static async Task Build(FSharpPlatform platform, FSharpConfiguration configuration, bool async)
         {
-            FSharpProjectGenerator.GenerateFsprojIfNotFound();
+            FSharpProjectGenerator.GenerateFsproj();
             await GenerateNuGetConfig(async);
             if (await DotnetRunner.Run("dotnet build Assembly-FSharp.fsproj", async, "build", FSharpProjectGenerator.FSProjPath, $"-p:Platform={platform}", $"-p:Configuration={configuration}"))
             {
