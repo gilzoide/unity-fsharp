@@ -1,3 +1,4 @@
+using System.IO;
 using System.Threading.Tasks;
 using Gilzoide.FSharp.Editor.Internal;
 using UnityEditor;
@@ -18,21 +19,27 @@ namespace Gilzoide.FSharp.Editor
 
     public static class FSharpBuilder
     {
+        public const string NuGetConfigPath = "nuget.config";
+
         private static bool _isBuildScheduled = false;
 
         public static void Build(FSharpPlatform platform, FSharpConfiguration configuration)
         {
-            FSharpProjectGenerator.GenerateFsprojIfNotFound();
-            DotnetRunner.Run(false, "build", FSharpProjectGenerator.FSProjPath, $"-p:Platform={platform}", $"-p:Configuration={configuration}").Wait();
-            AssetDatabase.ImportAsset(FSharpProjectGenerator.OutputDllPath);
+            Build(platform, configuration, false).Wait();
         }
-        
-        public static async Task BuildAsync(FSharpPlatform platform, FSharpConfiguration configuration)
+
+        public static Task BuildAsync(FSharpPlatform platform, FSharpConfiguration configuration)
+        {
+            return Build(platform, configuration, true);
+        }
+
+        private static async Task Build(FSharpPlatform platform, FSharpConfiguration configuration, bool async)
         {
             FSharpProjectGenerator.GenerateFsprojIfNotFound();
-            if (await DotnetRunner.Run(true, "build", FSharpProjectGenerator.FSProjPath, $"-p:Platform={platform}", $"-p:Configuration={configuration}"))
+            await GenerateNuGetConfig(async);
+            if (await DotnetRunner.Run("dotnet build Assembly-FSharp.fsproj", async, "build", FSharpProjectGenerator.FSProjPath, $"-p:Platform={platform}", $"-p:Configuration={configuration}"))
             {
-                AssetDatabase.ImportAsset(FSharpProjectGenerator.OutputDllPath);
+                AssetDatabase.ImportAsset(FSharpProjectGenerator.OutputDir, ImportAssetOptions.ImportRecursive);
             }
         }
 
@@ -59,6 +66,15 @@ namespace Gilzoide.FSharp.Editor
         private static void BuildEditor()
         {
             BuildAsync(FSharpPlatform.Editor, FSharpConfiguration.Debug).Forget();
+        }
+
+        public static async Task<bool> GenerateNuGetConfig(bool async)
+        {
+            if (File.Exists(NuGetConfigPath))
+            {
+                return true;
+            }
+            return await DotnetRunner.Run($"Generating {NuGetConfigPath}", async, "new", "nugetconfig");
         }
     }
 }
