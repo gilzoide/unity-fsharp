@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Threading.Tasks;
 using Gilzoide.FSharp.Editor.Internal;
 using UnityEditor;
 
@@ -10,7 +11,7 @@ namespace Gilzoide.FSharp.Editor
         {
             if (ShouldGenerateFsproj(assetName))
             {
-                FSharpProjectGenerator.GenerateFsprojOnceAsync().Forget();
+                OnSomethingChanged();
             }
         }
         
@@ -18,7 +19,7 @@ namespace Gilzoide.FSharp.Editor
         {
             if (ShouldGenerateFsproj(assetName))
             {
-                FSharpProjectGenerator.GenerateFsprojOnceAsync().Forget();
+                OnSomethingChanged();
             }
             return AssetDeleteResult.DidNotDelete;
         }
@@ -27,7 +28,7 @@ namespace Gilzoide.FSharp.Editor
         {
             if (ShouldGenerateFsproj(sourcePath) || ShouldGenerateFsproj(destinationPath))
             {
-                FSharpProjectGenerator.GenerateFsprojOnceAsync().Forget();
+                OnSomethingChanged();
             }
             return AssetMoveResult.DidNotMove;
         }
@@ -37,6 +38,27 @@ namespace Gilzoide.FSharp.Editor
             return assetName.EndsWith(".fs", true, CultureInfo.InvariantCulture)
                 || assetName.EndsWith(".dll", true, CultureInfo.InvariantCulture)
                 || assetName.EndsWith(".asmdef", true, CultureInfo.InvariantCulture);
+        }
+
+        private static bool _scheduled = false;
+        private static async void OnSomethingChanged()
+        {
+            if (_scheduled)
+            {
+                return;
+            }
+
+            _scheduled = true;
+            try
+            {
+                await Task.Yield();
+                FSharpSettings.Instance.RefreshScriptCompileOrder();
+                FSharpProjectGenerator.GenerateFsproj();
+            }
+            finally
+            {
+                _scheduled = false;
+            }
         }
     }
 }
