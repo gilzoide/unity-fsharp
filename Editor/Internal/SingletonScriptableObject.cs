@@ -16,7 +16,7 @@ namespace Gilzoide.FSharp.Editor.Internal
                 {
                     return _instance;
                 }
-                if (AssetDatabase.FindAssets($"t:{nameof(T)}")
+                if (AssetDatabase.FindAssets($"t:{typeof(T).Name}")
                     .Select(AssetDatabase.GUIDToAssetPath)
                     .Select(AssetDatabase.LoadAssetAtPath<T>)
                     .FirstOrDefault() is T loadedAsset
