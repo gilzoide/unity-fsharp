@@ -28,9 +28,13 @@ namespace Gilzoide.FSharp.Editor
         }
 
 #if UNITY_EDITOR_WIN
-        public static string DotnetInstallScriptName = "dotnet-install.ps1";
+        public const string DotnetInstallScriptName = "dotnet-install.ps1";
+        public const string RunScriptExe = "powershell";
+        public const string RunScriptArg = "-File";
 #else
-        public static string DotnetInstallScriptName = "dotnet-install.sh";
+        public const string DotnetInstallScriptName = "dotnet-install.sh";
+        public const string RunScriptExe = "sh";
+        public const string RunScriptArg = "";
 #endif
         public static string DotnetInstallScriptPath => AssetDatabase.FindAssets($"glob:{DotnetInstallScriptName}", null)
             .Select(AssetDatabase.GUIDToAssetPath)
@@ -57,16 +61,18 @@ namespace Gilzoide.FSharp.Editor
 
             var arguments = new List<string>
             {
-                "--install-dir",
-                $"'{DotnetInstallDir}'",
+                RunScriptArg,
+                Path.GetFullPath(DotnetInstallScriptPath),
+                "-InstallDir",
+                DotnetInstallDir,
             };
             if (!string.IsNullOrEmpty(sdkVersion))
             {
-                arguments.Add("--version");
-                arguments.Add($"'{sdkVersion}'");
+                arguments.Add("-Version");
+                arguments.Add(sdkVersion);
             }
 
-            return await ProcessRunner.Run("Installing .NET SDK", async, DotnetInstallScriptPath, arguments);
+            return await ProcessRunner.Run("Installing .NET SDK", async, RunScriptExe, arguments);
         }
     }
 }
