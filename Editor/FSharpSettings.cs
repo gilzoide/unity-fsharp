@@ -29,7 +29,7 @@ namespace Gilzoide.FSharp.Editor.Internal
             }
         }
 
-        [DidReloadScripts]
+        [InitializeOnLoadMethod]
         private static void CreateFSharpSettingsIfNecessary()
         {
             _ = Instance;
