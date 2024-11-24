@@ -53,6 +53,7 @@ namespace Gilzoide.FSharp.Editor
             {
                 await Task.Yield();
                 FSharpSettings.Instance.RefreshScriptCompileOrder();
+                await FSharpBuilder.BuildAsync(FSharpPlatform.Editor, FSharpConfiguration.Debug);
             }
             finally
             {
