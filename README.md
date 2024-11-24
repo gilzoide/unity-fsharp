@@ -19,6 +19,10 @@ Experimental support for F# scripting in Unity: create F# scripts with the `.fs`
 
 ## How to install
 Either:
+- Use the [openupm registry](https://openupm.com/) and install this package using the [openupm-cli](https://github.com/openupm/openupm-cli):
+  ```
+  openupm add com.gilzoide.fsharp
+  ```
 - Install using the [Unity Package Manager](https://docs.unity3d.com/Manual/upm-ui-giturl.html) with the following URL:
   ```
   https://github.com/gilzoide/unity-fsharp.git#1.0.0-preview1
