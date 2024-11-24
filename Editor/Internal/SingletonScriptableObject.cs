@@ -1,3 +1,4 @@
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -24,6 +25,7 @@ namespace Gilzoide.FSharp.Editor.Internal
                     return _instance = loadedAsset;
                 }
                 _instance = CreateInstance<T>();
+                Directory.CreateDirectory(Path.GetDirectoryName(_instance.DefaultAssetPath));
                 AssetDatabase.CreateAsset(_instance, _instance.DefaultAssetPath);
                 return _instance;
             }
