@@ -20,6 +20,8 @@ namespace Gilzoide.FSharp.Editor.Internal
                 FileName = fileName,
                 Arguments = string.Join(" ", args),
                 UseShellExecute = false,
+                CreateNoWindow = true,
+                WindowStyle = ProcessWindowStyle.Hidden,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
             };
