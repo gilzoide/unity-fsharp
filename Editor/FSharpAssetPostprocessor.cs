@@ -12,7 +12,7 @@ namespace Gilzoide.FSharp.Editor
 
         public static string OnGeneratedSlnSolution(string path, string content)
         {
-            if (_projectRegex.Match(content) is Match match)
+            if (!content.Contains($"\"{FSharpProjectGenerator.FSProjPath}\"") && _projectRegex.Match(content) is Match match)
             {
                 byte[] md5 = MD5.Create().ComputeHash(Encoding.ASCII.GetBytes(FSharpProjectGenerator.AssemblyName));
                 string guid = new Guid(md5).ToString("B").ToUpper();
