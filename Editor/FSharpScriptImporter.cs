@@ -5,12 +5,13 @@ using UnityEngine;
 
 namespace Gilzoide.FSharp.Editor
 {
-    [ScriptedImporter(0, "fs")]
+    [ScriptedImporter(1, "fs")]
     public class FSharpScriptImporter : ScriptedImporter
     {
         public override void OnImportAsset(AssetImportContext ctx)
         {
-            var scriptTextAsset = new TextAsset(File.ReadAllText(ctx.assetPath));
+            var scriptTextAsset = ScriptableObject.CreateInstance<FSharpScript>();
+            scriptTextAsset.Contents = File.ReadAllText(ctx.assetPath);
             ctx.AddObjectToAsset("main", scriptTextAsset);
 
             FSharpBuilder.BuildOnceAsync(FSharpPlatform.Editor, FSharpConfiguration.Debug).Forget();
