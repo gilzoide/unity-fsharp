@@ -9,7 +9,7 @@ Experimental support for F# scripting in Unity: create F# scripts with the `.fs`
     Consider ignoring this folder in your VCS (e.g.: adding to `.gitignore` file in Git repos).
   + The DLL references the same DLLs as `Assembly-CSharp` does.
   + Scripts inside `Editor` folders are only available in the Unity editor
-- Supports defining file compile order in the `Assets/Editor/FSharpSettings` asset
+- Supports defining script compilation order in the `Assets/Editor/FSharpSettings` asset
 - Supports defining package references in the `Assets/Editor/FSharpSettings` asset
 - Uses the same [scripting symbols](https://docs.unity3d.com/Manual/scripting-symbol-reference.html) as C#, e.g. `UNITY_EDITOR`, `UNITY_STANDALONE`, `DEVELOPMENT_BUILD`, etc...
 - `MonoBehaviour`/`ScriptableObject` class names do not need to have the same name as their source files.
@@ -68,16 +68,12 @@ type MyFSharpComponent() =
 ```
 
 
-## Defining file compilation order
-1. Select the `Assets/Editor/FSharpSettings` asset
-2. Freely reorder script file paths in the `Script Compile Order` list.
-   Tip: keep `FSharpGlobals.fs` first.
+## F# Settings asset
+The asset `Assets/Editor/FSharpSettings.asset` is created automatically and contains the following settings:
+- `Script Compile Order`: this list contains all F# script assets that will be compiled.
+  Freely reorder the scripts to ensure the correct compilation order in the F# project.
+  Tip: keep `FSharpGlobals.fs` first.
+- `Package References`: add NuGet package references to the F# project.
+  The package DLLs will be automatically copied to the `Assets/FSharpOutput` directory by the build.
 
-   <img src="Extras~/script-ordering.png" width="400" />
-
-
-## Declaring package references
-1. Select the `Assets/Editor/FSharpSettings` asset
-2. Add package references with their name and version in the `Package References` list.
-
-   <img src="Extras~/package-references.png" width="400" />
+<img src="Extras~/FSharpSettings.png" width="400" />
