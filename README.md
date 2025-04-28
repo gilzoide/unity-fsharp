@@ -1,4 +1,6 @@
 # F# for Unity
+[![openupm](https://img.shields.io/npm/v/com.gilzoide.fsharp?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.gilzoide.fsharp/)
+
 Experimental support for F# scripting in Unity: create F# scripts with the `.fs` file extension and they'll be built automatically using the [.NET SDK](https://dotnet.microsoft.com/).
 
 
