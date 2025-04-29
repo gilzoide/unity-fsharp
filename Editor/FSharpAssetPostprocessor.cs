@@ -9,21 +9,40 @@ namespace Gilzoide.FSharp.Editor
     public class FSharpAssetPostprocessor : AssetPostprocessor
     {
         static readonly Regex _projectRegex = new Regex(@"Project\(([^)]+)\)");
+        const string FSharpProjectTypeGuid = "{F2A71F9B-5D33-465A-A702-920D77279786}";
 
         public static string OnGeneratedSlnSolution(string path, string content)
         {
-            if (!content.Contains($"\"{FSharpProjectGenerator.FSProjPath}\"") && _projectRegex.Match(content) is Match match)
+            if (content.Contains($"\"{FSharpProjectGenerator.FSProjPath}\""))
             {
-                byte[] md5 = MD5.Create().ComputeHash(Encoding.ASCII.GetBytes(FSharpProjectGenerator.AssemblyName));
-                string guid = new Guid(md5).ToString("B").ToUpper();
-                var contentBuilder = new StringBuilder();
-                contentBuilder.Append(content, 0, match.Index);
-                contentBuilder.AppendLine($"{match.Captures[0]} = \"{FSharpProjectGenerator.AssemblyName}\", \"{FSharpProjectGenerator.FSProjPath}\", \"{guid}\"");
-                contentBuilder.AppendLine("EndProject");
-                contentBuilder.Append(content, match.Index, content.Length - match.Index);
-                content = contentBuilder.ToString();
+                return content;
             }
-            return content;
+
+            var match = _projectRegex.Match(content);
+
+            string projectType = match.Success
+                ? match.Groups[1].Value               // copy first project’s type
+                : FSharpProjectTypeGuid;              // or use F# GUID if none exist
+
+            byte[] md5 = MD5.Create().ComputeHash(Encoding.ASCII.GetBytes(FSharpProjectGenerator.AssemblyName));
+            string guid = new Guid(md5).ToString("B").ToUpper();
+
+            int insertPos = match.Success
+                ? match.Index
+                : content.IndexOf("\nGlobal", StringComparison.Ordinal);
+
+            if (insertPos < 0) insertPos = content.Length;
+
+            var contentBuilder = new StringBuilder();
+            contentBuilder.Append(content, 0, insertPos);
+            contentBuilder.AppendLine($"Project({projectType}) = \"{FSharpProjectGenerator.AssemblyName}\", " +
+                          $"\"{FSharpProjectGenerator.FSProjPath}\", \"{guid}\"");
+            contentBuilder.AppendLine("EndProject");
+            contentBuilder.Append(content, insertPos, content.Length - insertPos);
+
+            return contentBuilder.ToString();
         }
     }
 }
+
+
