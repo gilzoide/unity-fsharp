@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Gilzoide.FSharp.Editor
 {
+    [CreateAssetMenu(menuName = "Scripting/Empty F# Script")]
     public class FSharpScript : ScriptableObject
     {
         [SerializeField] private string _contents;
