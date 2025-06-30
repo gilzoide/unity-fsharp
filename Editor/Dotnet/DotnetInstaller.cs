@@ -11,7 +11,7 @@ namespace Gilzoide.FSharp.Editor
     {
         public const string DotnetInstallDirKey = "dotnet-sdk-install-dir";
         public const string DotnetInstallDirDefault = "Library/dotnet-sdk-install-dir";
-        public const string DotnetSdkVersion = "9.0.100";
+        public const string DotnetSdkVersion = "9.0.301";
 
         public static string DotnetInstallDir
         {
