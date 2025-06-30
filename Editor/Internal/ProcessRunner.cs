@@ -31,7 +31,7 @@ namespace Gilzoide.FSharp.Editor.Internal
                 {
                     if (!string.IsNullOrEmpty(args.Data))
                     {
-                        Debug.Log($"[{progressMessage}] {args.Data}");
+                        LogMessage($"[{progressMessage}] {args.Data}");
                     }
                 };
                 process.ErrorDataReceived += (sender, args) =>
@@ -65,6 +65,22 @@ namespace Gilzoide.FSharp.Editor.Internal
                     Progress.Remove(progressId);
                 }
                 return process.ExitCode == 0;
+            }
+        }
+
+        private static void LogMessage(string message)
+        {
+            if (message.Contains(": error"))
+            {
+                Debug.LogError(message);
+            }
+            else if (message.Contains(": warning"))
+            {
+                Debug.LogWarning(message);
+            }
+            else
+            {
+                Debug.Log(message);
             }
         }
     }
