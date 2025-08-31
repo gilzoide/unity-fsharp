@@ -1,27 +1,17 @@
-using System;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.IO;
 using UnityEditor;
 
 namespace Gilzoide.FSharp.Editor
 {
     public class FSharpAssetPostprocessor : AssetPostprocessor
     {
-        static readonly Regex _projectRegex = new Regex(@"Project\(([^)]+)\)");
-
         public static string OnGeneratedSlnSolution(string path, string content)
         {
-            if (!content.Contains($"\"{FSharpProjectGenerator.FSProjPath}\"") && _projectRegex.Match(content) is Match match)
+            if (!content.Contains("Assembly-FSharp.fsproj"))
             {
-                byte[] md5 = MD5.Create().ComputeHash(Encoding.ASCII.GetBytes(FSharpProjectGenerator.AssemblyName));
-                string guid = new Guid(md5).ToString("B").ToUpper();
-                var contentBuilder = new StringBuilder();
-                contentBuilder.Append(content, 0, match.Index);
-                contentBuilder.AppendLine($"{match.Captures[0]} = \"{FSharpProjectGenerator.AssemblyName}\", \"{FSharpProjectGenerator.FSProjPath}\", \"{guid}\"");
-                contentBuilder.AppendLine("EndProject");
-                contentBuilder.Append(content, match.Index, content.Length - match.Index);
-                content = contentBuilder.ToString();
+                File.WriteAllText(path, content);
+                DotnetRunner.Run($"dotnet sln add Assembly-FSharp.fsproj", false, "sln", "add", "Assembly-FSharp.fsproj").Wait();
+                return File.ReadAllText(path);
             }
             return content;
         }
