@@ -14,7 +14,7 @@ namespace Gilzoide.FSharp.Editor
             get => _contents;
             set => _contents = value;
         }
-        public string AssetPath => Path.GetRelativePath(".", AssetDatabase.GetAssetPath(this));
+        public string AssetPath => Path.GetRelativePath(".", Path.GetFullPath(AssetDatabase.GetAssetPath(this)));
 
         public FSharpScript(string contents)
         {
