@@ -1,5 +1,6 @@
 using System.IO;
 using UnityEditor;
+using UnityEditor.Compilation;
 using UnityEngine;
 
 namespace Gilzoide.FSharp.Editor
@@ -33,7 +34,43 @@ namespace Gilzoide.FSharp.Editor
             string path = EditorUtility.SaveFilePanelInProject("New F# script", "NewFSharpEmptyScript", "fs", "", baseDir);
             if (!string.IsNullOrEmpty(path))
             {
-                File.WriteAllText(path, "");
+                File.WriteAllText(path, $"namespace {GetNamespaceForScript(path)}\n\n");
+                AssetDatabase.ImportAsset(path);
+            }
+        }
+
+        [MenuItem("Assets/Create/Scripting/MonoBehaviour F# Script")]
+        private static void CreateBehaviourFSharpScript()
+        {
+            string baseDir = "Assets";
+            foreach (Object obj in Selection.GetFiltered<DefaultAsset>(SelectionMode.Assets))
+            {
+                baseDir = AssetDatabase.GetAssetPath(obj);
+            }
+
+            string path = EditorUtility.SaveFilePanelInProject("New F# MonoBehaviour script", "NewFSharpBehaviourScript", "fs", "", baseDir);
+            if (!string.IsNullOrEmpty(path))
+            {
+                string className = Path.GetFileNameWithoutExtension(path);
+                File.WriteAllText(path, $"namespace {GetNamespaceForScript(path)}\n\nopen UnityEngine\n\ntype {className}() =\n    inherit MonoBehaviour()");
+                AssetDatabase.ImportAsset(path);
+            }
+        }
+
+        [MenuItem("Assets/Create/Scripting/ScriptableObject F# Script")]
+        private static void CreateScriptableObjectFSharpScript()
+        {
+            string baseDir = "Assets";
+            foreach (Object obj in Selection.GetFiltered<DefaultAsset>(SelectionMode.Assets))
+            {
+                baseDir = AssetDatabase.GetAssetPath(obj);
+            }
+
+            string path = EditorUtility.SaveFilePanelInProject("New F# ScriptableObject script", "NewFSharpScriptableObjectScript", "fs", "", baseDir);
+            if (!string.IsNullOrEmpty(path))
+            {
+                string className = Path.GetFileNameWithoutExtension(path);
+                File.WriteAllText(path, $"namespace {GetNamespaceForScript(path)}\n\nopen UnityEngine\n\ntype {className}() =\n    inherit ScriptableObject()");
                 AssetDatabase.ImportAsset(path);
             }
         }
@@ -61,6 +98,19 @@ namespace Gilzoide.FSharp.Editor
                     EditorGUILayout.TextArea(serializedObject.FindProperty(nameof(_contents)).stringValue);
                 }
                 serializedObject.ApplyModifiedProperties();
+            }
+        }
+
+        private static string GetNamespaceForScript(string path)
+        {
+            string @namespace = CompilationPipeline.GetAssemblyRootNamespaceFromScriptPath(path);
+            if (!string.IsNullOrEmpty(@namespace))
+            {
+                return @namespace;
+            }
+            else
+            {
+                return "AssemblyFSharp";
             }
         }
 #endif
