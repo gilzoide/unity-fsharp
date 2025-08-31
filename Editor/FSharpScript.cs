@@ -39,6 +39,42 @@ namespace Gilzoide.FSharp.Editor
             }
         }
 
+        [MenuItem("Assets/Create/Scripting/MonoBehaviour F# Script")]
+        private static void CreateBehaviourFSharpScript()
+        {
+            string baseDir = "Assets";
+            foreach (Object obj in Selection.GetFiltered<DefaultAsset>(SelectionMode.Assets))
+            {
+                baseDir = AssetDatabase.GetAssetPath(obj);
+            }
+
+            string path = EditorUtility.SaveFilePanelInProject("New F# MonoBehaviour script", "NewFSharpBehaviourScript", "fs", "", baseDir);
+            if (!string.IsNullOrEmpty(path))
+            {
+                string className = Path.GetFileNameWithoutExtension(path);
+                File.WriteAllText(path, $"namespace {GetNamespaceForScript(path)}\n\nopen UnityEngine\n\ntype {className}() =\n    inherit MonoBehaviour()");
+                AssetDatabase.ImportAsset(path);
+            }
+        }
+
+        [MenuItem("Assets/Create/Scripting/ScriptableObject F# Script")]
+        private static void CreateScriptableObjectFSharpScript()
+        {
+            string baseDir = "Assets";
+            foreach (Object obj in Selection.GetFiltered<DefaultAsset>(SelectionMode.Assets))
+            {
+                baseDir = AssetDatabase.GetAssetPath(obj);
+            }
+
+            string path = EditorUtility.SaveFilePanelInProject("New F# ScriptableObject script", "NewFSharpScriptableObjectScript", "fs", "", baseDir);
+            if (!string.IsNullOrEmpty(path))
+            {
+                string className = Path.GetFileNameWithoutExtension(path);
+                File.WriteAllText(path, $"namespace {GetNamespaceForScript(path)}\n\nopen UnityEngine\n\ntype {className}() =\n    inherit ScriptableObject()");
+                AssetDatabase.ImportAsset(path);
+            }
+        }
+
         [CustomPropertyDrawer(typeof(FSharpScript))]
         private class FSharpScriptPropertyDrawer : PropertyDrawer
         {
