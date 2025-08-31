@@ -11,7 +11,7 @@ namespace Gilzoide.FSharp.Editor
             {
                 File.WriteAllText(path, content);
                 FSharpProjectGenerator.GenerateFsproj();
-                DotnetRunner.Run($"dotnet sln add Assembly-FSharp.fsproj", false, "sln", "add", "Assembly-FSharp.fsproj").Wait();
+                DotnetRunner.Run($"dotnet sln '{path}' add Assembly-FSharp.fsproj", false, "sln", path, "add", "Assembly-FSharp.fsproj").Wait();
                 return File.ReadAllText(path);
             }
             return content;
