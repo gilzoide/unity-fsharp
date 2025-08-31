@@ -1,5 +1,6 @@
 using System.IO;
 using UnityEditor;
+using UnityEditor.Compilation;
 using UnityEngine;
 
 namespace Gilzoide.FSharp.Editor
@@ -33,7 +34,7 @@ namespace Gilzoide.FSharp.Editor
             string path = EditorUtility.SaveFilePanelInProject("New F# script", "NewFSharpEmptyScript", "fs", "", baseDir);
             if (!string.IsNullOrEmpty(path))
             {
-                File.WriteAllText(path, "");
+                File.WriteAllText(path, $"namespace {GetNamespaceForScript(path)}\n\n");
                 AssetDatabase.ImportAsset(path);
             }
         }
@@ -61,6 +62,19 @@ namespace Gilzoide.FSharp.Editor
                     EditorGUILayout.TextArea(serializedObject.FindProperty(nameof(_contents)).stringValue);
                 }
                 serializedObject.ApplyModifiedProperties();
+            }
+        }
+
+        private static string GetNamespaceForScript(string path)
+        {
+            string @namespace = CompilationPipeline.GetAssemblyRootNamespaceFromScriptPath(path);
+            if (!string.IsNullOrEmpty(@namespace))
+            {
+                return @namespace;
+            }
+            else
+            {
+                return "AssemblyFSharp";
             }
         }
 #endif
