@@ -10,6 +10,7 @@ namespace Gilzoide.FSharp.Editor
             if (!content.Contains("Assembly-FSharp.fsproj"))
             {
                 File.WriteAllText(path, content);
+                FSharpProjectGenerator.GenerateFsproj();
                 DotnetRunner.Run($"dotnet sln add Assembly-FSharp.fsproj", false, "sln", "add", "Assembly-FSharp.fsproj").Wait();
                 return File.ReadAllText(path);
             }
