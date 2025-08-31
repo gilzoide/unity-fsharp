@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace Gilzoide.FSharp.Editor
 {
-    [CreateAssetMenu(menuName = "Scripting/Empty F# Script")]
     public class FSharpScript : ScriptableObject
     {
         [SerializeField] private string _contents;
@@ -19,6 +18,24 @@ namespace Gilzoide.FSharp.Editor
         public FSharpScript(string contents)
         {
             _contents = contents;
+        }
+
+#if UNITY_EDITOR
+        [MenuItem("Assets/Create/Scripting/Empty F# Script")]
+        private static void CreateEmptyFSharpScript()
+        {
+            string baseDir = "Assets";
+            foreach (Object obj in Selection.GetFiltered<DefaultAsset>(SelectionMode.Assets))
+            {
+                baseDir = AssetDatabase.GetAssetPath(obj);
+            }
+
+            string path = EditorUtility.SaveFilePanelInProject("New F# script", "NewFSharpEmptyScript", "fs", "", baseDir);
+            if (!string.IsNullOrEmpty(path))
+            {
+                File.WriteAllText(path, "");
+                AssetDatabase.ImportAsset(path);
+            }
         }
 
         [CustomPropertyDrawer(typeof(FSharpScript))]
@@ -46,5 +63,6 @@ namespace Gilzoide.FSharp.Editor
                 serializedObject.ApplyModifiedProperties();
             }
         }
+#endif
     }
 }
