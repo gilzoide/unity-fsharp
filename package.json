@@ -1,7 +1,7 @@
 {
   "name": "com.gilzoide.fsharp",
   "displayName": "F#",
-  "version": "1.0.0-preview4",
+  "version": "1.0.0-preview5",
   "description": "Support F# scripting in Unity with automatic compilation",
   "homepage": "https://github.com/gilzoide/unity-fsharp",
   "license": "Unlicense",
