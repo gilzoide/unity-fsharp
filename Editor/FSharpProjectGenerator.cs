@@ -28,6 +28,7 @@ namespace Gilzoide.FSharp.Editor
             defaultProperties.AddElement("Configuration", "Condition", " '$(Configuration)' == '' ", "Debug");
             defaultProperties.AddElement("Platforms", "Editor;Player");
             defaultProperties.AddElement("Platform", "Condition", " '$(Platform)' == '' ", "Editor");
+            defaultProperties.AddElement("Platform", "Condition", " '$(Platform)' == 'AnyCPU' ", "Editor");
             defaultProperties.AddElement("AssemblyName", AssemblyName);
             defaultProperties.AddElement("OutputType", "Library");
             defaultProperties.AddElement("OutputPath", OutputDir);
