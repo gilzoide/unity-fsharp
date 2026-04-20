@@ -18,13 +18,19 @@ namespace Gilzoide.FSharp.Editor.Internal
             var processInfo = new ProcessStartInfo
             {
                 FileName = fileName,
-                Arguments = string.Join(" ", args),
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 WindowStyle = ProcessWindowStyle.Hidden,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
             };
+            foreach (string arg in args)
+            {
+                if (!string.IsNullOrWhiteSpace(arg))
+                {
+                    processInfo.ArgumentList.Add(arg);
+                }
+            }
             using (var process = Process.Start(processInfo))
             {
                 process.OutputDataReceived += (sender, args) =>
