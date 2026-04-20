@@ -32,7 +32,6 @@ namespace Gilzoide.FSharp.Editor
             defaultProperties.AddElement("AssemblyName", AssemblyName);
             defaultProperties.AddElement("OutputType", "Library");
             defaultProperties.AddElement("OutputPath", OutputDir);
-            defaultProperties.AddElement("TargetFramework", "netstandard2.0");
             defaultProperties.AddElement("CopyLocalLockFileAssemblies", "true");
             defaultProperties.AddElement("SatelliteResourceLanguages", "none");
             defaultProperties.AddElement("NoStandardLibraries", "true");
@@ -44,11 +43,13 @@ namespace Gilzoide.FSharp.Editor
             Assembly[] editorAssemblies = CompilationPipeline.GetAssemblies(AssembliesType.Editor);
             string[] editorScriptingDefines = editorAssemblies[0].defines;
             var editorProperties = project.AddElement("PropertyGroup", "Condition", " '$(Platform)' == 'Editor' ");
+            editorProperties.AddElement("TargetFramework", GetTargetFramework(editorAssemblies[0].compilerOptions, editor: true));
             editorProperties.AddElement("DefineConstants", string.Join(";", editorScriptingDefines));
 
             Assembly[] playerAssemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies);
             string[] playerScriptingDefines = playerAssemblies[0].defines;
             var playerProperties = project.AddElement("PropertyGroup", "Condition", " '$(Platform)' == 'Player' ");
+            playerProperties.AddElement("TargetFramework", GetTargetFramework(playerAssemblies[0].compilerOptions, editor: false));
             playerProperties.AddElement("DefineConstants", string.Join(";", playerScriptingDefines));
 
             var debugProperties = project.AddElement("PropertyGroup", "Condition", " '$(Configuration)' == 'Debug' ");
@@ -112,6 +113,26 @@ namespace Gilzoide.FSharp.Editor
 
             fsproj.Save(FSProjPath);
             return FSProjPath;
+        }
+
+        private static string GetTargetFramework(ScriptCompilerOptions scriptCompilerOptions, bool editor)
+        {
+#if UNITY_2023_1_OR_NEWER
+            if (editor)
+            {
+                return scriptCompilerOptions.EditorAssembliesCompatibilityLevel switch
+                {
+                    EditorAssembliesCompatibilityLevel.NET_Standard => "netstandard2.1",
+                    _ => "net48",
+                };
+            }
+#endif
+            return scriptCompilerOptions.ApiCompatibilityLevel switch
+            {
+                ApiCompatibilityLevel.NET_Unity_4_8 => "net48",
+                ApiCompatibilityLevel.NET_Standard => "netstandard2.1",
+                _ => "netstandard2.0",
+            };
         }
     }
 }
