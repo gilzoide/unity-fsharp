@@ -52,6 +52,7 @@ namespace Gilzoide.FSharp.Editor.Internal
                     {
                         while (!process.HasExited)
                         {
+                            Progress.Report(progressId, 0);
                             await Task.Yield();
                         }
                     }
